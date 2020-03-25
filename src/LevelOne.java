@@ -32,11 +32,13 @@ public class LevelOne extends JPanel implements MouseListener, MouseMotionListen
 	private int[] mons_x = new int[3];//怪兽坐标
 	private int[] mons_y = new int[3];
 	private int[] mons_dir = new int [3];//怪兽方向
-	private int[] walls_x = new int[100];
-	private int[] walls_y = new int[100];
+//	private int[] walls_x = new int[100];
+//	private int[] walls_y = new int[100];
+	
 	private int[] floor_x = new int[100];
 	private int[] floor_y = new int[100];
-	private int[][] kind = new int[20][20];//标识格子属性，人-1，豆子0，墙4，空白5，怪物1,2,3
+//	private int[][] kind = new int[20][20];//标识格子属性，人-1，豆子0，墙4，空白5，怪物1,2,3
+	private int[][] kind;
 	
 	private Image background = new ImageIcon("pictures/background.png").getImage();
 	private Image bean = new ImageIcon("pictures/bean.png").getImage();
@@ -57,16 +59,19 @@ public class LevelOne extends JPanel implements MouseListener, MouseMotionListen
 			grids_x[i] = start_x + i*15;
 			grids_y[i] = start_y + i*15;
 		}
-		for(int i = 0; i< 20; i++)
-			for(int j = 0; j< 20; j++)
-				kind[i][i] = 0;	
+//		for(int i = 0; i< 20; i++)
+//			for(int j = 0; j< 20; j++)
+//				kind[i][i] = 0;	
 	}
 	
 	public void initialMan(Random rand) {
-		int tmp_x = rand.nextInt(20), tmp_y = rand.nextInt(20);
-		px = tmp_x;//生成0-19的随机整数,人的初始位置
-		py = tmp_y;
-		kind[tmp_y][tmp_x] = -1;
+//		int tmp_x = rand.nextInt(20), tmp_y = rand.nextInt(20);
+//		px = tmp_x;//生成0-19的随机整数,人的初始位置
+//		py = tmp_y;
+//		kind[tmp_y][tmp_x] = -1;
+		kind[5][0] = -1;
+		px = 0;
+		py = 5;
 	}
 	
 	public void initialMonsters(Random rand) {
@@ -84,15 +89,17 @@ public class LevelOne extends JPanel implements MouseListener, MouseMotionListen
 	}
 	
 	public void initialWall(Random rand) {
-		int num = 0;
-		while(num < 100) {
-			int tmp_x = rand.nextInt(20), tmp_y = rand.nextInt(20);
-			if(kind[tmp_y][tmp_x]!=0 && kind[tmp_y][tmp_x] <= 4) continue;
-			walls_x[num] = grids_x[tmp_x];
-			walls_y[num] = grids_y[tmp_y];
-			kind[tmp_y][tmp_x] = 4;
-			num++;
-		}
+//		int num = 0;
+//		while(num < 100) {
+//			int tmp_x = rand.nextInt(20), tmp_y = rand.nextInt(20);
+//			if(kind[tmp_y][tmp_x]!=0 && kind[tmp_y][tmp_x] <= 4) continue;
+//			walls_x[num] = grids_x[tmp_x];
+//			walls_y[num] = grids_y[tmp_y];
+//			kind[tmp_y][tmp_x] = 4;
+//			num++;
+//		}
+
+		
 	}
 	
 	public void initialFloor(Random rand) {
@@ -107,26 +114,27 @@ public class LevelOne extends JPanel implements MouseListener, MouseMotionListen
 		}
 	}
 	
-	public LevelOne(JFrame frame) {
+	public LevelOne(JFrame frame, int[][] kind, int level) {
 		super();
 		play = true;
 		this.frame = frame;
-		level = 1;
+		this.level = level;
 		rand = new Random();
 		time = 0;
 		direction = 4;
 		man = man_r;
+		this.kind = kind;
 		score = 0;
 		initialGirds();
 		initialMan(rand);
 		initialMonsters(rand);
-		initialWall(rand);
+//		initialWall(rand);
 		initialFloor(rand);
-//		for(int i=0; i<20;i++) {
-//			for(int j=0;j<20;j++)
-//				System.out.print(kind[i][j]);
-//			System.out.println();
-//		}
+		for(int i=0; i<20;i++) {
+			for(int j=0;j<20;j++)
+				System.out.print(kind[i][j]);
+			System.out.println();
+		}
 		if (thread == null || !thread.isAlive())
 		      thread = new Thread(this);
 		      thread.start();
@@ -135,6 +143,7 @@ public class LevelOne extends JPanel implements MouseListener, MouseMotionListen
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
+		if(score >= 200) gameWin();
 		time++;
 		//人运动
 		g.drawImage(background, 0, 0, this);
@@ -187,13 +196,24 @@ public class LevelOne extends JPanel implements MouseListener, MouseMotionListen
 
 	}
 	
+	public void gameWin() {
+		play = false;
+	    thread.stop();
+	    frame.dispose();
+	    GameManager g;
+	    if(level != 3)
+	    	g = new GameManager(level+1, true); //到失败界面
+	    else 
+	    	g = new GameManager(100, true);//通关
+		g.setVisible(true);
+	}
+	
 	public void gameLose() {
 		play = false;
 	    thread.stop();
-	    
-//	    frame.dispose();
-//		MenuFrame f = new MenuFrame(); //到主界面
-//		f.setVisible(true);
+	    frame.dispose();
+		GameManager g = new GameManager(level, false); //到失败界面
+		g.setVisible(true);
 	}
 	
 	public int monsAround(int i) {//怪物在人的那一边，上1下2左3右4,0不邻接
@@ -218,7 +238,7 @@ public class LevelOne extends JPanel implements MouseListener, MouseMotionListen
 		default:break;
 		}
 		if(x<0 || x>19 || y<0 || y>19)return false;
-		if(kind[y][x] == 0 || kind[y][x] == 5) return true;
+		if(kind[y][x]==0 || kind[y][x] == 5) return true;
 		return false;
 	}
 

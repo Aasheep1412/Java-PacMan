@@ -10,24 +10,22 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-public class StartPanel extends JPanel implements MouseListener, MouseMotionListener, Runnable{
+public class LosePanel extends JPanel implements MouseListener, MouseMotionListener, Runnable{
 	private int px;
 	private int py; 
 	
+	private int level;
 	private Thread thread;
 	private boolean play;
 	private JFrame frame;
-	private int level;
 	
-	private Image background;
-	private Image start = new ImageIcon("pictures/start.png").getImage();
-	private Image startIcon = new ImageIcon("pictures/startIcon.png").getImage();
+	private Image loseGame = new ImageIcon("pictures/loseGame.png").getImage();
 	
-	public StartPanel(JFrame frame) {
+	public LosePanel(JFrame frame, int level) {
 		super();
 		play = true;
+		this.level = level;
 		this.frame = frame;
-		level = 0;
 		if (thread == null || !thread.isAlive())
 		      thread = new Thread(this);
 		      thread.start();
@@ -36,7 +34,20 @@ public class StartPanel extends JPanel implements MouseListener, MouseMotionList
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		g.drawImage(start, 0, 0, this);
+		g.drawImage(loseGame, 0, 0, this);
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		while (play) {
+	         try {
+	            Thread.sleep(100);
+	         } catch (Exception e) {
+	            e.printStackTrace();
+	         }
+	         repaint(); 
+	      }
 	}
 
 	@Override
@@ -56,29 +67,21 @@ public class StartPanel extends JPanel implements MouseListener, MouseMotionList
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
-		if(px >= 86 && py >= 324 && px <= 333 && py <=390) {
+		if(px >= 128 && py >= 238 && px <= 300 && py <=273) {//重新开始
 			play = false;
 			thread.stop();
 			frame.dispose();
-			GameManager g = new GameManager(1, true);
+			GameManager g = new GameManager(level, true);
 			g.setVisible(true);
 		}
-			
+		if(px >= 128 && py >= 296 && px <= 300 && py <=338) {
+			play = false;
+		    thread.stop();  
+		    frame.dispose();
+			MyFrame f = new MyFrame(); //到主界面
+			f.setVisible(true);
+		}
 	}
-	
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-		while (play) {
-	         try {
-	            Thread.sleep(100);
-	         } catch (Exception e) {
-	            e.printStackTrace();
-	         }
-	         repaint(); 
-	      }
-	}
-	
 
 	@Override
 	public void mousePressed(MouseEvent e) {
@@ -103,8 +106,4 @@ public class StartPanel extends JPanel implements MouseListener, MouseMotionList
 		// TODO Auto-generated method stub
 		
 	}
-	
-
-
-	
 }

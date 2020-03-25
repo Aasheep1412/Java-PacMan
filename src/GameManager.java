@@ -13,57 +13,129 @@ import javax.swing.JPanel;
 
 public class GameManager extends JFrame  {
  
-   private LevelOne panel1;
-   private LevelTwo panel2;
-   private LevelThree panel3;
+   private JPanel panel1;
    public GameManager frame;
+   public boolean win;
+   public int[][][] kinds = {{{0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0},
+		  {0,4,4,0,4,4,0,4,0,4,4,0,4,0,4,4,0,4,4,0},
+		  {0,4,4,0,4,4,0,4,0,4,4,0,4,0,4,4,0,4,4,0},
+		  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+		  {0,4,4,4,0,0,0,4,4,4,4,4,4,0,0,0,4,4,4,0},
+		  {0,0,0,0,0,4,0,0,0,4,4,0,0,0,4,0,0,0,0,0},
+		  {4,4,4,4,0,4,0,0,0,4,4,0,0,0,4,0,4,4,4,4},
+		  {0,0,0,4,0,4,4,4,0,0,0,0,4,4,4,0,4,0,0,0},
+		  {0,4,4,4,0,4,0,0,0,0,0,0,0,0,4,0,4,4,4,0},
+		  {0,0,0,0,0,4,0,4,4,0,0,4,4,0,4,0,0,0,0,0},
+		  {0,4,4,4,0,0,0,4,0,0,0,0,4,0,0,0,4,4,4,0},
+		  {0,0,0,4,0,0,0,4,4,4,4,4,4,0,0,0,4,0,0,0},
+		  {4,4,4,4,0,4,0,0,0,0,0,0,0,0,4,0,4,4,4,4},
+		  {0,0,0,0,0,4,0,4,4,4,4,4,4,0,4,0,0,0,0,0},
+		  {0,4,4,0,0,4,4,4,4,4,4,4,4,4,4,0,0,4,4,0},
+		  {0,4,4,4,0,0,0,4,4,4,4,4,4,0,0,0,4,4,4,0},
+		  {0,4,4,4,4,0,0,0,0,0,0,0,0,0,0,4,4,4,4,0},
+		  {0,0,4,4,4,4,0,0,0,4,4,0,0,0,4,4,4,4,0,0},
+		  {4,0,0,0,4,4,0,0,4,4,4,4,0,0,4,4,4,0,0,4},
+		  {4,4,0,0,0,0,0,4,4,4,4,4,4,0,0,0,0,0,4,4}},
+		   
+		   {{4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,0},
+				{4,0,0,4,4,4,4,0,0,4,4,4,4,0,0,4,0,4,4,0},
+				{4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,4,0,0},
+				{4,4,4,4,0,0,4,4,4,4,0,0,4,4,0,4,0,4,4,4},
+				{4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,4,0,0,0,0},
+				{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0},
+				{4,4,4,4,4,0,4,4,4,4,4,4,4,4,4,4,0,4,0,0},
+				{4,0,0,0,4,0,4,4,0,0,0,0,4,0,0,0,0,4,0,4},
+				{4,0,4,0,4,0,4,4,0,4,4,0,4,0,4,4,0,4,0,0},
+				{4,0,4,0,4,0,4,4,0,4,4,0,4,0,4,4,0,4,4,0},
+				{4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0},
+				{4,0,4,0,4,0,4,4,4,4,4,4,4,4,4,4,4,4,0,4},
+				{4,0,4,0,4,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0},
+				{4,0,0,0,4,0,4,4,0,4,4,0,4,0,4,0,0,4,4,0},
+				{4,4,4,4,4,0,4,4,0,4,4,0,4,0,4,4,0,0,0,0},
+				{0,0,0,0,0,0,0,0,0,0,0,0,4,0,4,0,0,4,4,4},
+				{0,4,4,4,4,4,4,4,4,4,4,4,4,0,4,0,4,4,4,4},
+				{0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,4,0,0,0},
+				{0,4,4,0,0,4,4,0,0,4,4,0,0,4,4,0,4,4,4,0},
+				{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}},
+		   
+		   {{4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4},
+	    			  {4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4},
+	    			  {4,4,0,0,4,4,4,4,0,4,4,0,4,4,4,4,0,0,0,0},
+	    			  {4,4,4,0,4,4,4,4,0,4,4,0,4,4,4,4,0,4,4,4},
+	    			  {4,4,4,0,0,0,4,4,0,4,4,0,0,0,0,0,0,0,0,0},
+	    			  {4,0,0,0,0,0,4,4,0,4,4,0,4,4,4,4,4,4,4,0},
+	    			  {4,4,4,4,0,0,4,4,0,4,4,0,4,0,0,0,4,0,0,0},
+	    			  {4,4,4,4,0,0,0,0,0,0,0,0,4,0,4,0,0,0,4,0},
+	    			  {0,0,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4},
+	    			  {4,4,4,0,0,4,4,4,4,4,4,4,4,4,4,4,4,0,0,4},
+	    			  {4,4,4,4,0,4,4,0,0,0,0,0,0,0,0,4,4,0,4,4},
+	    			  {0,0,4,0,0,4,4,0,0,0,0,0,0,0,0,4,4,0,4,4},
+	    			  {4,0,4,0,0,4,4,4,4,4,4,4,4,4,0,4,4,0,0,4},
+	    			  {0,0,4,0,0,4,4,4,4,4,4,4,4,4,0,4,4,0,4,4},
+	    			  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4},
+	    			  {4,4,4,0,0,4,4,4,4,4,4,4,4,4,4,4,0,0,0,0},
+	    			  {4,4,4,0,0,0,4,4,4,0,0,4,4,4,0,0,0,4,4,0},
+	    			  {0,0,4,4,4,0,0,0,0,0,0,0,0,0,0,4,4,4,0,0},
+	    			  {4,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,4},
+	    			  {4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4}}
+		   };
    
-   public GameManager(int levelNum) {
+   public GameManager(int levelNum, boolean win) {
       super("Pac man");
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+      this.win = win;
       if(levelNum == 1) {  //关卡1
-    	  getContentPane().add(getPanel1(), BorderLayout.CENTER);
+    	  getContentPane().add(getPanel(1), BorderLayout.CENTER);
       }
       else if(levelNum == 2) {  //关卡2
-    	  getContentPane().add(getPanel2(), BorderLayout.CENTER);
+    	  getContentPane().add(getPanel(2), BorderLayout.CENTER);
       } 
       else if(levelNum == 3) {   //关卡3
-    	  getContentPane().add(getPanel3(), BorderLayout.CENTER);
+    	  getContentPane().add(getPanel(3), BorderLayout.CENTER);
+      }
+      else if(levelNum == 0) {   //失败
+    	  getContentPane().add(getPanel(0), BorderLayout.CENTER);
+      }
+      else if(levelNum == 100) {
+    	  getContentPane().add(getPanel(100), BorderLayout.CENTER);
       }
       setVisible(true);
       setSize(435,465);
       setLocationRelativeTo(null);
    }
    
-   protected JPanel getPanel1() {
+   protected JPanel getPanel(int level) {
       if (panel1 == null) {
-         panel1 = new LevelOne(this); 
-         panel1.addMouseListener(panel1);
-         panel1.addMouseMotionListener(panel1);
-         this.addKeyListener(panel1);
+    	  if(win) {
+    		  if(level == 100) {
+    			  panel1 = new WinPanel();
+    		  }
+    		  else {
+		    	  if(level == 1) {
+			    	  int[][] kind = kinds[0];
+			    	  panel1 = new LevelOne(this, kind, 1); 
+		    	  }
+		    	  else if(level == 2) {
+			    	  int[][] kind = kinds[1];
+			    	  panel1 = new LevelOne(this, kind, 2); 
+		    	  }
+		    	  else if(level == 3) {
+			    	  int[][] kind = kinds[2];
+			    	  panel1 = new LevelOne(this, kind, 3); 
+		    	  }
+		    	  panel1.addMouseListener((LevelOne)panel1);
+		          panel1.addMouseMotionListener((LevelOne)panel1);
+		          this.addKeyListener((LevelOne)panel1);
+    		  }
+    	  }
+    	  else {
+    		  panel1 = new LosePanel(this, level);
+    		  panel1.addMouseListener((LosePanel)panel1);
+	          panel1.addMouseMotionListener((LosePanel)panel1);
+    	  }
+          
       }
       return panel1;
-   }
-   
-   protected JPanel getPanel2() {
-      if (panel2 == null) {
-         panel2 = new LevelTwo(this); 
-         panel2.addMouseListener(panel2);
-         panel2.addMouseMotionListener(panel2);
-         this.addKeyListener(panel2);
-      }
-      return panel2;
-   }
-   
-   protected JPanel getPanel3() {
-      if (panel3 == null) {
-         panel3 = new LevelThree(this); 
-         panel3.addMouseListener(panel3);
-         panel3.addMouseMotionListener(panel3);
-         this.addKeyListener(panel3);
-      }
-      return panel3;
    }
    
 }
