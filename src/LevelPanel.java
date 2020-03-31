@@ -13,19 +13,23 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-public class LevelOne extends JPanel implements MouseListener, MouseMotionListener, Runnable, KeyListener{
+//关卡界面
+public class LevelPanel extends JPanel implements MouseListener, MouseMotionListener, Runnable, KeyListener{
 	
-	private int px;
+	private int px;//人所在坐标
 	private int py; 
 	
-	private int time;
+	private int timer;//计时器
 	private Thread thread;
-	private boolean play;
+	private boolean play;//是否继续
 	private JFrame frame;
-	private int level;
+	private int level;//关卡层数
 	private Random rand;
 	private int direction;//上1下2左3右4
-	private int score;
+	private int score;//本分数
+	private int[] scores = {-1, -1, -1};//所有关卡分数
+	private int beanNum;//豆子数量
+//	private boolean loseLevel;//是否失败
 	
 	private int[] grids_x = new int[20];//网格坐标
 	private int[] grids_y = new int[20];
@@ -35,11 +39,12 @@ public class LevelOne extends JPanel implements MouseListener, MouseMotionListen
 //	private int[] walls_x = new int[100];
 //	private int[] walls_y = new int[100];
 	
-	private int[] floor_x = new int[100];
+	private int[] floor_x = new int[100];//地面坐标
 	private int[] floor_y = new int[100];
 //	private int[][] kind = new int[20][20];//标识格子属性，人-1，豆子0，墙4，空白5，怪物1,2,3
-	private int[][] kind;
-	
+	private int[][] kind;//标识格子属性，人-1，豆子0，墙4，空白5，怪物1,2,3
+
+	//图片
 	private Image background = new ImageIcon("pictures/background.png").getImage();
 	private Image bean = new ImageIcon("pictures/bean.png").getImage();
 	private Image man_r = new ImageIcon("pictures/man_r.png").getImage();
@@ -52,18 +57,17 @@ public class LevelOne extends JPanel implements MouseListener, MouseMotionListen
 	private Image wall = new ImageIcon("pictures/wall.png").getImage();
 	private Image lose = new ImageIcon("pictures/lose.png").getImage();
 	private Image man;
-	
+
+	//初始化20*20地图网格
 	public void initialGirds() {
 		int start_x = 62, start_y = 80;
 		for(int i = 0; i < 20; i++) {
 			grids_x[i] = start_x + i*15;
 			grids_y[i] = start_y + i*15;
 		}
-//		for(int i = 0; i< 20; i++)
-//			for(int j = 0; j< 20; j++)
-//				kind[i][i] = 0;	
 	}
-	
+
+	//初始化人的位置
 	public void initialMan(Random rand) {
 //		int tmp_x = rand.nextInt(20), tmp_y = rand.nextInt(20);
 //		px = tmp_x;//生成0-19的随机整数,人的初始位置
@@ -73,7 +77,8 @@ public class LevelOne extends JPanel implements MouseListener, MouseMotionListen
 		px = 0;
 		py = 5;
 	}
-	
+
+	//初始化怪物的随机位置
 	public void initialMonsters(Random rand) {
 		int num = 0;
 		while(num < 3) {
@@ -88,7 +93,7 @@ public class LevelOne extends JPanel implements MouseListener, MouseMotionListen
 		}
 	}
 	
-	public void initialWall(Random rand) {
+//	public void initialWall(Random rand) {
 //		int num = 0;
 //		while(num < 100) {
 //			int tmp_x = rand.nextInt(20), tmp_y = rand.nextInt(20);
@@ -98,10 +103,9 @@ public class LevelOne extends JPanel implements MouseListener, MouseMotionListen
 //			kind[tmp_y][tmp_x] = 4;
 //			num++;
 //		}
+//	}
 
-		
-	}
-	
+	//初始化地面
 	public void initialFloor(Random rand) {
 		int num = 0;
 		while(num < 100) {
@@ -113,28 +117,41 @@ public class LevelOne extends JPanel implements MouseListener, MouseMotionListen
 			num++;
 		}
 	}
+
+	//计算豆子的初始数量
+	public int calcBeanNum() {
+		int num = 0;
+		for(int i=0;i<20;i++)
+			for(int j=0;j<20;j++)
+				if(kind[i][j]==0)num++;
+		return num;
+	}
 	
-	public LevelOne(JFrame frame, int[][] kind, int level) {
+	public LevelPanel(JFrame frame, int[][] kind, int level, int[] scores) {
 		super();
 		play = true;
+//		loseLevel = false;
 		this.frame = frame;
 		this.level = level;
+		this.scores = scores;
 		rand = new Random();
-		time = 0;
-		direction = 4;
+		timer = 0;//初始化计时器
+		direction = 4;//默认人的初始方向向右
 		man = man_r;
-		this.kind = kind;
+		this.kind = kind;//加载关卡地图
 		score = 0;
+		//初始化地图
 		initialGirds();
 		initialMan(rand);
 		initialMonsters(rand);
 //		initialWall(rand);
 		initialFloor(rand);
-		for(int i=0; i<20;i++) {
-			for(int j=0;j<20;j++)
-				System.out.print(kind[i][j]);
-			System.out.println();
-		}
+		beanNum = calcBeanNum();
+//		for(int i=0; i<20;i++) {
+//			for(int j=0;j<20;j++)
+//				System.out.print(kind[i][j]);
+//			System.out.println();
+//		}
 		if (thread == null || !thread.isAlive())
 		      thread = new Thread(this);
 		      thread.start();
@@ -143,40 +160,41 @@ public class LevelOne extends JPanel implements MouseListener, MouseMotionListen
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		if(score >= 200) gameWin();
-		time++;
-		//人运动
-		g.drawImage(background, 0, 0, this);
-		String tmp_s = "Score: "+String.valueOf(score);
+		if(beanNum==0) gameWin();//豆子被吃完则关卡通过
+//		if(score == 100) gameWin();
+		timer++;
+		g.drawImage(background, 0, 0, this);//加载背景图片
+		String tmp_s = "Score: "+String.valueOf(score);//记录分数
 		g.drawChars(tmp_s.toCharArray(), 0, tmp_s.length(), 190, 400);
+		//人运动
 		switch(direction) {
-			case 1: man = man_u;if(canMove(px, py, 1)) {kind[py][px]=5;py-=1;if(kind[py][px]==0) {score+=20;}kind[py][px]=-1;}break;
-			case 2: man = man_d;if(canMove(px, py, 2)) {kind[py][px]=5;py+=1;if(kind[py][px]==0) {score+=20;}kind[py][px]=-1;}break;
-			case 3: man = man_l;if(canMove(px, py, 3)) {kind[py][px]=5;px-=1;if(kind[py][px]==0) {score+=20;}kind[py][px]=-1;}break;
-			case 4: man = man_r;if(canMove(px, py, 4)) {kind[py][px]=5;px+=1;if(kind[py][px]==0) {score+=20;}kind[py][px]=-1;}break;
+			case 1: man = man_u;if(canMoveMan(px, py, 1)) {kind[py][px]=5;py-=1;if(kind[py][px]>=1&&kind[py][px]<=3)/*碰到怪*/{g.drawImage(lose, 80, 0, this);gameLose();}if(kind[py][px]==0)/*吃到豆子*/ {score+=20;beanNum--;}kind[py][px]=-1;}break;
+			case 2: man = man_d;if(canMoveMan(px, py, 2)) {kind[py][px]=5;py+=1;if(kind[py][px]>=1&&kind[py][px]<=3)/*碰到怪*/{g.drawImage(lose, 80, 0, this);gameLose();}if(kind[py][px]==0) /*吃到豆子*/{score+=20;beanNum--;}kind[py][px]=-1;}break;
+			case 3: man = man_l;if(canMoveMan(px, py, 3)) {kind[py][px]=5;px-=1;if(kind[py][px]>=1&&kind[py][px]<=3)/*碰到怪*/{g.drawImage(lose, 80, 0, this);gameLose();}if(kind[py][px]==0) /*吃到豆子*/{score+=20;beanNum--;}kind[py][px]=-1;}break;
+			case 4: man = man_r;if(canMoveMan(px, py, 4)) {kind[py][px]=5;px+=1;if(kind[py][px]>=1&&kind[py][px]<=3)/*碰到怪*/{g.drawImage(lose, 80, 0, this);gameLose();}if(kind[py][px]==0)/*吃到豆子*/ {score+=20;beanNum--;}kind[py][px]=-1;}break;
 			default:break;
 		}
 		//怪兽运动
 		for(int i=0;i<3;i++) {
-			mons_dir[i] = 1+rand.nextInt(4);//1~4
+			mons_dir[i] = 1+rand.nextInt(4);//1~4随机方向
 			switch(mons_dir[i]) {
-				case 1:if(canMove(mons_x[i], mons_y[i], 1)) {kind[mons_y[i]][mons_x[i]]=5;mons_y[i]-=1;kind[mons_y[i]][mons_x[i]]=i+1;}break;
-				case 2:if(canMove(mons_x[i], mons_y[i], 2)) {kind[mons_y[i]][mons_x[i]]=5;mons_y[i]+=1;kind[mons_y[i]][mons_x[i]]=i+1;}break;
-				case 3:if(canMove(mons_x[i], mons_y[i], 3)) {kind[mons_y[i]][mons_x[i]]=5;mons_x[i]-=1;kind[mons_y[i]][mons_x[i]]=i+1;}break;
-				case 4:if(canMove(mons_x[i], mons_y[i], 4)) {kind[mons_y[i]][mons_x[i]]=5;mons_x[i]+=1;kind[mons_y[i]][mons_x[i]]=i+1;}break;
+				case 1:if(canMoveMonster(mons_x[i], mons_y[i], 1)) {kind[mons_y[i]][mons_x[i]]=5;mons_y[i]-=1;if(kind[mons_y[i]][mons_x[i]]==-1)/*碰到人*/{g.drawImage(lose, 80, 0, this);gameLose();}if(kind[mons_y[i]][mons_x[i]]==0) /*吃到豆子*/{beanNum--;}kind[mons_y[i]][mons_x[i]]=i+1;}break;
+				case 2:if(canMoveMonster(mons_x[i], mons_y[i], 2)) {kind[mons_y[i]][mons_x[i]]=5;mons_y[i]+=1;if(kind[mons_y[i]][mons_x[i]]==-1)/*碰到人*/{g.drawImage(lose, 80, 0, this);gameLose();}if(kind[mons_y[i]][mons_x[i]]==0)/*吃到豆子*/ {beanNum--;}kind[mons_y[i]][mons_x[i]]=i+1;}break;
+				case 3:if(canMoveMonster(mons_x[i], mons_y[i], 3)) {kind[mons_y[i]][mons_x[i]]=5;mons_x[i]-=1;if(kind[mons_y[i]][mons_x[i]]==-1)/*碰到人*/{g.drawImage(lose, 80, 0, this);gameLose();}if(kind[mons_y[i]][mons_x[i]]==0) /*吃到豆子*/{beanNum--;}kind[mons_y[i]][mons_x[i]]=i+1;}break;
+				case 4:if(canMoveMonster(mons_x[i], mons_y[i], 4)) {kind[mons_y[i]][mons_x[i]]=5;mons_x[i]+=1;if(kind[mons_y[i]][mons_x[i]]==-1)/*碰到人*/{g.drawImage(lose, 80, 0, this);gameLose();}if(kind[mons_y[i]][mons_x[i]]==0) /*吃到豆子*/{beanNum--;}kind[mons_y[i]][mons_x[i]]=i+1;}break;
 				default:break;
 			}
 		}
-		//判断是否撞怪物
-		for(int i=0;i<3;i++) {
-			switch(monsAround(i)){ //怪物i在人周围哪个方向
-				case 1:if(direction==1 && mons_dir[i]== 2) {g.drawImage(lose, 80, 0, this);gameLose();}break;
-				case 2:if(direction==2 && mons_dir[i]== 1) {g.drawImage(lose, 80, 0, this);gameLose();}break;
-				case 3:if(direction==3 && mons_dir[i]== 4) {g.drawImage(lose, 80, 0, this);gameLose();}break;
-				case 4:if(direction==4 && mons_dir[i]== 3) {g.drawImage(lose, 80, 0, this);gameLose();}break;
-				default:break;
-			}
-		}
+//		//判断是否撞怪物
+//		for(int i=0;i<3;i++) {
+//			switch(monsAround(i)){ //怪物i在人周围哪个方向
+//				case 1:if(direction==1 && mons_dir[i]== 2) {g.drawImage(lose, 80, 0, this);gameLose();}break;
+//				case 2:if(direction==2 && mons_dir[i]== 1) {g.drawImage(lose, 80, 0, this);gameLose();}break;
+//				case 3:if(direction==3 && mons_dir[i]== 4) {g.drawImage(lose, 80, 0, this);gameLose();}break;
+//				case 4:if(direction==4 && mons_dir[i]== 3) {g.drawImage(lose, 80, 0, this);gameLose();}break;
+//				default:break;
+//			}
+//		}
 		
 		//画图
 		for(int i = 0; i< 20; i++)
@@ -193,29 +211,37 @@ public class LevelOne extends JPanel implements MouseListener, MouseMotionListen
 				}
 				g.drawImage(tmp, grids_x[i], grids_y[j], this);
 			}
+//		if(loseLevel){//关卡失败
+//			g.drawImage(lose, 80, 0, this);gameLose();
+//		}
 
 	}
-	
+
+	//关卡通过
 	public void gameWin() {
 		play = false;
+		scores[level-1] = score;//本关分数
 	    thread.stop();
 	    frame.dispose();
 	    GameManager g;
 	    if(level != 3)
-	    	g = new GameManager(level+1, true); //到失败界面
+	    	g = new GameManager(level+1, true, scores); //到失败界面
 	    else 
-	    	g = new GameManager(100, true);//通关
+	    	g = new GameManager(100, true, scores);//通关
 		g.setVisible(true);
 	}
-	
+
+	//关卡失败
 	public void gameLose() {
 		play = false;
+		scores[level-1] = score;//本关分数
 	    thread.stop();
 	    frame.dispose();
-		GameManager g = new GameManager(level, false); //到失败界面
+		GameManager g = new GameManager(level, false, scores); //到失败界面
 		g.setVisible(true);
 	}
-	
+
+	//判断是否有怪兽在人的四周
 	public int monsAround(int i) {//怪物在人的那一边，上1下2左3右4,0不邻接
 		if(Math.abs(px-mons_x[i])==1 && py==mons_y[i]) {
 			if(px>mons_x[i]) return 3;
@@ -227,9 +253,10 @@ public class LevelOne extends JPanel implements MouseListener, MouseMotionListen
 		}
 		return 0;
 	}
-	
-	public boolean canMove(int px, int py, int direction) {
-		int x=px,y=py;
+
+	//判断在此方向上人是否可以继续走
+	public boolean canMoveMan(int px, int py, int direction) {
+		int x=px, y=py;
 		switch(direction) {
 		case 1:y-=1;break;
 		case 2:y+=1;break;
@@ -237,8 +264,23 @@ public class LevelOne extends JPanel implements MouseListener, MouseMotionListen
 		case 4:x+=1;break;
 		default:break;
 		}
-		if(x<0 || x>19 || y<0 || y>19)return false;
-		if(kind[y][x]==0 || kind[y][x] == 5) return true;
+		if(x<0 || x>19 || y<0 || y>19)return false;//超出边界
+		if(kind[y][x] !=  4) return true;//不能碰墙
+		return false;
+	}
+
+	//判断在此方向上怪物是否可以继续走
+	public boolean canMoveMonster(int px, int py, int direction) {
+		int x=px, y=py;
+		switch(direction) {
+			case 1:y-=1;break;
+			case 2:y+=1;break;
+			case 3:x-=1;break;
+			case 4:x+=1;break;
+			default:break;
+		}
+		if(x<0 || x>19 || y<0 || y>19)return false;//超出边界
+		if(kind[y][x] < 1 || kind[y][x] > 4) return true;//不能碰墙和怪
 		return false;
 	}
 
@@ -257,32 +299,26 @@ public class LevelOne extends JPanel implements MouseListener, MouseMotionListen
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
-//		px = e.getX();
-//		py = e.getY();
 	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -312,7 +348,7 @@ public class LevelOne extends JPanel implements MouseListener, MouseMotionListen
 		if(e.getKeyCode()==KeyEvent.VK_LEFT) {direction = 3;}
 		if(e.getKeyCode()==KeyEvent.VK_RIGHT) {direction = 4;}
 		//调用 repaint() 函数，来重绘制界面
-		repaint();
+//		repaint();
 	}
 
 	@Override

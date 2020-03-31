@@ -10,24 +10,26 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+//开始界面面板
 public class StartPanel extends JPanel implements MouseListener, MouseMotionListener, Runnable{
-	private int px;
+	private int px;//鼠标坐标
 	private int py; 
 	
 	private Thread thread;
 	private boolean play;
 	private JFrame frame;
-	private int level;
+	private int[] scores = {-1, -1, -1};//所有关卡得分
+//	private int level;//关卡层数
 	
-	private Image background;
+//	private Image background;
 	private Image start = new ImageIcon("pictures/start.png").getImage();
-	private Image startIcon = new ImageIcon("pictures/startIcon.png").getImage();
+//	private Image startIcon = new ImageIcon("pictures/startIcon.png").getImage();
 	
 	public StartPanel(JFrame frame) {
 		super();
 		play = true;
 		this.frame = frame;
-		level = 0;
+//		level = 0;
 		if (thread == null || !thread.isAlive())
 		      thread = new Thread(this);
 		      thread.start();
@@ -56,11 +58,11 @@ public class StartPanel extends JPanel implements MouseListener, MouseMotionList
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
-		if(px >= 86 && py >= 324 && px <= 333 && py <=390) {
+		if(px >= 86 && py >= 324 && px <= 333 && py <=390) {//开始游戏，到关卡1
 			play = false;
 			thread.stop();
 			frame.dispose();
-			GameManager g = new GameManager(1, true);
+			GameManager g = new GameManager(1, true, scores);
 			g.setVisible(true);
 		}
 			

@@ -4,8 +4,9 @@ import java.awt.BorderLayout;
 
 import javax.swing.JFrame;
 
+//初始界面
 public class MyFrame extends JFrame{
-	private StartPanel st;
+	private StartPanel st;//开始界面面板
 	
 	public MyFrame() {
 		super("Pac man");
