@@ -1,2 +1,2 @@
 # Java-PacMan
-java写吃豆子小游戏
+java吃豆子小游戏
