@@ -1,25 +1,28 @@
-package src;
+package game;
 
-import java.awt.Graphics;
-import java.awt.Image;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-
-//关卡失败界面
+/**
+ * 关卡失败界面
+ * @author DengYuhan
+ * @date 2020/3/28
+ */
 public class LosePanel extends JPanel implements MouseListener, MouseMotionListener, Runnable{
-	private int px;//鼠标坐标
-	private int py; 
-	
-	private int level;//关卡层数
+	/**鼠标坐标*/
+	private int px;
+	private int py;
+
+	/**关卡层数*/
+	private int level;
 	private Thread thread;
 	private boolean play;
 	private JFrame frame;
-	private int[] scores = {-1, -1, -1};//存储所有关卡的分数
+	/**存储所有关卡的分数*/
+	private int[] scores = {-1, -1, -1};
 	
 	private Image loseGame = new ImageIcon("pictures/loseGame.png").getImage();
 	
@@ -29,8 +32,9 @@ public class LosePanel extends JPanel implements MouseListener, MouseMotionListe
 		this.level = level;
 		this.frame = frame;
 		this.scores = scores;
-		if (thread == null || !thread.isAlive())
-		      thread = new Thread(this);
+		if (thread == null || !thread.isAlive()) {
+			thread = new Thread(this);
+		}
 		      thread.start();
 	}
 	
@@ -39,6 +43,7 @@ public class LosePanel extends JPanel implements MouseListener, MouseMotionListe
 		super.paintComponent(g);
 		g.drawImage(loseGame, 0, 0, this);
 		int tmp = 0;
+		//显示得分
 		for(int i=0; i<scores.length; i++){
 			if(scores[i] != -1) {
 				tmp += scores[i];
@@ -79,8 +84,8 @@ public class LosePanel extends JPanel implements MouseListener, MouseMotionListe
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
-		if(px >= 128 && py >= 238 && px <= 300 && py <=273) {//重新开始
+		//重新开始
+		if(px >= 128 && py >= 238 && px <= 300 && py <=273) {
 			play = false;
 			scores[level-1] = -1;
 			thread.stop();
@@ -88,12 +93,16 @@ public class LosePanel extends JPanel implements MouseListener, MouseMotionListe
 			GameManager g = new GameManager(level, true, scores);
 			g.setVisible(true);
 		}
-		if(px >= 128 && py >= 296 && px <= 300 && py <=338) {//返回主界面
+		//返回主界面
+		if(px >= 128 && py >= 296 && px <= 300 && py <=338) {
 			play = false;
-			for(int i=0; i<scores.length; i++) scores[i] = -1;
+			for(int i=0; i<scores.length; i++) {
+				scores[i] = -1;
+			}
 		    thread.stop();  
 		    frame.dispose();
-			MyFrame f = new MyFrame(); //到主界面
+			//到主界面
+			MyFrame f = new MyFrame();
 			f.setVisible(true);
 		}
 	}

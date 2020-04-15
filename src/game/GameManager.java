@@ -1,20 +1,22 @@
-package src;
+package game;
 
-import java.awt.BorderLayout;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
+import java.awt.*;
 
 /**
- * 界面控制器
+ * 界面控制器，控制向哪个关卡切换
+ * @author DengYuhan
+ * @date 2020/3/28
  */
 public class GameManager extends JFrame  {
  
    private JPanel panel;
    public GameManager frame;
-   public boolean win;//关卡通过还是失败
-	public int scores[] = {-1, -1, -1};//记录每个关卡的得分
-   //关卡地图
+	/**关卡通过还是失败*/
+   public boolean win;
+	/**记录每个关卡的得分*/
+	public int[] scores = {-1, -1, -1};
+   /**关卡地图（只包含墙和豆子）*/
    public int[][][] kinds = {{{0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0},
 		  {0,4,4,0,4,4,0,4,0,4,4,0,4,0,4,4,0,4,4,0},
 		  {0,4,4,0,4,4,0,4,0,4,4,0,4,0,4,4,0,4,4,0},
@@ -84,19 +86,24 @@ public class GameManager extends JFrame  {
       this.scores = scores;
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       this.win = win;
-      if(levelNum == 1) {  //关卡1
+	   //关卡1
+      if(levelNum == LevelPanel.LEVELONE) {
     	  getContentPane().add(getPanel(1), BorderLayout.CENTER);
       }
-      else if(levelNum == 2) {  //关卡2
+	  //关卡2
+      else if(levelNum == LevelPanel.LEVELTWO) {
     	  getContentPane().add(getPanel(2), BorderLayout.CENTER);
-      } 
-      else if(levelNum == 3) {   //关卡3
+      }
+	  //关卡3
+      else if(levelNum == LevelPanel.LEVELTHREE) {
     	  getContentPane().add(getPanel(3), BorderLayout.CENTER);
       }
-      else if(levelNum == 0) {   //失败
+	  //失败
+      else if(levelNum == LevelPanel.LEVELLOSE) {
     	  getContentPane().add(getPanel(0), BorderLayout.CENTER);
       }
-      else if(levelNum == 100) { //通关
+	  //通关
+      else if(levelNum == LevelPanel.LEVELPASS) {
     	  getContentPane().add(getPanel(100), BorderLayout.CENTER);
       }
       setVisible(true);
@@ -104,37 +111,37 @@ public class GameManager extends JFrame  {
       setLocationRelativeTo(null);
    }
 
-   //界面
+   /**界面*/
 	protected JPanel getPanel(int level) {
       if (panel == null) {
-    	  if(win) { //通过关卡
-    		  if(level == 100) { //通关
+		  //通过关卡
+    	  if(win) {
+			  //通关
+    		  if(level == LevelPanel.LEVELPASS) {
     			  panel = new WinPanel(scores);
     		  }
     		  else {
-		    	  if(level == 1) {
+		    	  if(level == LevelPanel.LEVELONE) {
 			    	  int[][] kind = kinds[0];
 			    	  panel = new LevelPanel(this, kind, 1, scores);
 		    	  }
-		    	  else if(level == 2) {
+		    	  else if(level == LevelPanel.LEVELTWO) {
 			    	  int[][] kind = kinds[1];
 			    	  panel = new LevelPanel(this, kind, 2, scores);
 		    	  }
-		    	  else if(level == 3) {
+		    	  else if(level == LevelPanel.LEVELTHREE) {
 			    	  int[][] kind = kinds[2];
 			    	  panel = new LevelPanel(this, kind, 3, scores);
 		    	  }
-		    	  panel.addMouseListener((LevelPanel)panel);
-		          panel.addMouseMotionListener((LevelPanel)panel);
 		          this.addKeyListener((LevelPanel)panel);
     		  }
     	  }
-    	  else { //未通过关卡
+		  //未通过关卡
+    	  else {
     		  panel = new LosePanel(this, level, scores);
     		  panel.addMouseListener((LosePanel)panel);
 	          panel.addMouseMotionListener((LosePanel)panel);
     	  }
-          
       }
       return panel;
    }

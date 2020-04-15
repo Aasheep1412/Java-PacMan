@@ -1,37 +1,35 @@
-package src;
+package game;
 
-import java.awt.Graphics;
-import java.awt.Image;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-
-//开始界面面板
+/**
+ * 开始界面面板
+ * @author DengYuhan
+ * @date 2020/3/28
+ */
 public class StartPanel extends JPanel implements MouseListener, MouseMotionListener, Runnable{
-	private int px;//鼠标坐标
+	/**鼠标坐标*/
+	private int px;
 	private int py; 
 	
 	private Thread thread;
 	private boolean play;
 	private JFrame frame;
-	private int[] scores = {-1, -1, -1};//所有关卡得分
-//	private int level;//关卡层数
-	
-//	private Image background;
+	/**所有关卡得分*/
+	private int[] scores = {-1, -1, -1};
 	private Image start = new ImageIcon("pictures/start.png").getImage();
-//	private Image startIcon = new ImageIcon("pictures/startIcon.png").getImage();
 	
 	public StartPanel(JFrame frame) {
 		super();
 		play = true;
 		this.frame = frame;
-//		level = 0;
-		if (thread == null || !thread.isAlive())
-		      thread = new Thread(this);
+		if (thread == null || !thread.isAlive()) {
+			thread = new Thread(this);
+		}
 		      thread.start();
 	}
 	
@@ -57,8 +55,8 @@ public class StartPanel extends JPanel implements MouseListener, MouseMotionList
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
-		if(px >= 86 && py >= 324 && px <= 333 && py <=390) {//开始游戏，到关卡1
+		//开始游戏，到关卡1
+		if(px >= 86 && py >= 324 && px <= 333 && py <=390) {
 			play = false;
 			thread.stop();
 			frame.dispose();
